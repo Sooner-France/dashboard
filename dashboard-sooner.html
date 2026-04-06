@@ -787,26 +787,90 @@ function renderOverview(){
   var gadsSpend=gadsC.reduce(function(s,r){return s+pN(r['Cost (EUR)'])},0);
   var totalSpend=metaSpend+gadsSpend;
 
-  var metaPurch=metaC.reduce(function(s,r){return s+pN(r['Website purchases'])},0);
-  var gadsPurch=gadsC.reduce(function(s,r){return s+pN(r['Conversions'])},0);
-  var totalSVOD=metaPurch+gadsPurch;
+  // META SVOD = sum of 3 SVOD custom conversions from Meta_Conversions tab
+  var metaConv=filterByDate(DATA.Meta_Conversions||[]);
+  var metaSvodPurch=metaConv.reduce(function(s,r){
+    return s+pN(r['Purchase SVOD Mensuel Classique'])+pN(r['Purchase SVOD Annuel'])+pN(r['Purchase SVOD SOONER+']);
+  },0);
+  // GADS SVOD = filter Gads_Conversions on Abonnement actions only
+  var gadsConv=filterByDate(DATA.Gads_Conversions||[]);
+  var gadsSvodPurch=gadsConv.reduce(function(s,r){
+    var name=(r['Conversion type name']||'').toLowerCase();
+    if(name.indexOf('abonnement')!==-1) return s+pN(r['Conversions']);
+    return s;
+  },0);
+  var totalSVOD=metaSvodPurch+gadsSvodPurch;
 
   var cpaSVOD=totalSVOD>0?totalSpend/totalSVOD:0;
 
-  // Revenue SVOD = Meta Website purchases conversion value (most reliable source for SVOD)
-  var metaRevenue=metaC.reduce(function(s,r){return s+pN(r['Website purchases conversion value'])},0);
-  var ga4TotalRevenue=ga4E.reduce(function(s,r){return s+pN(r['Item revenue'])},0);
-  var totalRevSVOD=metaRevenue;
+  // Revenue SVOD from conversion value columns
+  var metaSvodRev=metaConv.reduce(function(s,r){
+    return s+pN(r['Purchase SVOD Mensuel Classique conversion value'])+pN(r['Purchase SVOD Annuel conversion value'])+pN(r['Purchase SVOD SOONER+ conversion value']);
+  },0);
+  var gadsSvodRev=gadsConv.reduce(function(s,r){
+    var name=(r['Conversion type name']||'').toLowerCase();
+    if(name.indexOf('abonnement')!==-1) return s+pN(r['Total conversion value']);
+    return s;
+  },0);
+  var totalRevSVOD=metaSvodRev+gadsSvodRev;
 
-  // ROAS = Meta Revenue / Total Spend
-  var roas=totalSpend>0?metaRevenue/totalSpend:0;
+  // ROAS = Revenue SVOD / Total Spend
+  var roas=totalSpend>0?totalRevSVOD/totalSpend:0;
 
-  // TVOD revenue approximation = GA4 total revenue - Meta revenue
-  var tvodRev=Math.max(0,ga4TotalRevenue-metaRevenue);
-  var ga4TotalPurch=ga4E.reduce(function(s,r){return s+pN(r['Purchases'])},0);
-  var tvodPurch=Math.max(0,ga4TotalPurch-totalSVOD);
+  // TVOD purchases from conversion data
+  var metaTvodPurch=metaConv.reduce(function(s,r){
+    return s+pN(r['Purchase TVOD Achat'])+pN(r['Purchase TVOD Location']);
+  },0);
+  var gadsTvodPurch=gadsConv.reduce(function(s,r){
+    var name=(r['Conversion type name']||'').toLowerCase();
+    if(name.indexOf('tvod')!==-1||name.indexOf('location')!==-1||(name.indexOf('achat')!==-1&&name.indexOf('tvod')!==-1)) return s+pN(r['Conversions']);
+    return s;
+  },0);
+  var totalTVOD=metaTvodPurch+gadsTvodPurch;
 
-  console.log('[SOONER] Meta Revenue:', metaRevenue, 'GA4 Revenue:', ga4TotalRevenue, 'Total Spend:', totalSpend, 'ROAS:', roas);
+  // TVOD revenue
+  var metaTvodRev=metaConv.reduce(function(s,r){
+    return s+pN(r['Purchase TVOD Achat conversion value'])+pN(r['Purchase TVOD Location conversion value']);
+  },0);
+  var gadsTvodRev=gadsConv.reduce(function(s,r){
+    var name=(r['Conversion type name']||'').toLowerCase();
+    if(name.indexOf('tvod')!==-1||name.indexOf('location')!==-1||(name.indexOf('achat')!==-1&&name.indexOf('tvod')!==-1)) return s+pN(r['Total conversion value']);
+    return s;
+  },0);
+  var totalRevTVOD=metaTvodRev+gadsTvodRev;
+
+  // Individual SVOD line items for detail table
+  var metaAboMensuel=metaConv.reduce(function(s,r){return s+pN(r['Purchase SVOD Mensuel Classique'])},0);
+  var metaAboAnnuel=metaConv.reduce(function(s,r){return s+pN(r['Purchase SVOD Annuel'])},0);
+  var metaAboPlus=metaConv.reduce(function(s,r){return s+pN(r['Purchase SVOD SOONER+'])},0);
+  var metaTvodAchat=metaConv.reduce(function(s,r){return s+pN(r['Purchase TVOD Achat'])},0);
+  var metaTvodLoc=metaConv.reduce(function(s,r){return s+pN(r['Purchase TVOD Location'])},0);
+  var metaAboMensuelRev=metaConv.reduce(function(s,r){return s+pN(r['Purchase SVOD Mensuel Classique conversion value'])},0);
+  var metaAboAnnuelRev=metaConv.reduce(function(s,r){return s+pN(r['Purchase SVOD Annuel conversion value'])},0);
+  var metaAboPlusRev=metaConv.reduce(function(s,r){return s+pN(r['Purchase SVOD SOONER+ conversion value'])},0);
+  var metaTvodAchatRev=metaConv.reduce(function(s,r){return s+pN(r['Purchase TVOD Achat conversion value'])},0);
+  var metaTvodLocRev=metaConv.reduce(function(s,r){return s+pN(r['Purchase TVOD Location conversion value'])},0);
+
+  var gadsAboMensuel=0,gadsAboAnnuel=0,gadsAboPlus=0,gadsTvodAchatConv=0,gadsTvodLocConv=0;
+  var gadsAboMensuelRev=0,gadsAboAnnuelRev=0,gadsAboPlusRev=0,gadsTvodAchatRev2=0,gadsTvodLocRev2=0;
+  gadsConv.forEach(function(r){
+    var name=(r['Conversion type name']||'').toLowerCase();
+    var cv=pN(r['Conversions']),val=pN(r['Total conversion value']);
+    if(name.indexOf('mensuel')!==-1&&name.indexOf('abonnement')!==-1){gadsAboMensuel+=cv;gadsAboMensuelRev+=val}
+    else if(name.indexOf('annuel')!==-1&&name.indexOf('abonnement')!==-1){gadsAboAnnuel+=cv;gadsAboAnnuelRev+=val}
+    else if(name.indexOf('sooner+')!==-1||name.indexOf('sooner +')!==-1){gadsAboPlus+=cv;gadsAboPlusRev+=val}
+    else if(name.indexOf('abonnement')!==-1){gadsAboMensuel+=cv;gadsAboMensuelRev+=val}
+    if(name.indexOf('tvod')!==-1&&name.indexOf('achat')!==-1){gadsTvodAchatConv+=cv;gadsTvodAchatRev2+=val}
+    else if(name.indexOf('tvod')!==-1||name.indexOf('location')!==-1){gadsTvodLocConv+=cv;gadsTvodLocRev2+=val}
+  });
+
+  var lineAboMensuel=metaAboMensuel+gadsAboMensuel,lineAboMensuelRev=metaAboMensuelRev+gadsAboMensuelRev;
+  var lineAboAnnuel=metaAboAnnuel+gadsAboAnnuel,lineAboAnnuelRev=metaAboAnnuelRev+gadsAboAnnuelRev;
+  var lineAboPlus=metaAboPlus+gadsAboPlus,lineAboPlusRev=metaAboPlusRev+gadsAboPlusRev;
+  var lineTvodAchat=metaTvodAchat+gadsTvodAchatConv,lineTvodAchatRev=metaTvodAchatRev+gadsTvodAchatRev2;
+  var lineTvodLoc=metaTvodLoc+gadsTvodLocConv,lineTvodLocRev=metaTvodLocRev+gadsTvodLocRev2;
+
+  console.log('[SOONER] SVOD: Meta='+metaSvodPurch+' GAds='+gadsSvodPurch.toFixed(1)+' Total='+totalSVOD.toFixed(1)+' | TVOD: '+totalTVOD.toFixed(1)+' | CPA SVOD='+cpaSVOD.toFixed(2)+'\u20AC');
 
   // Previous period
   var prev=getPrevRange();
@@ -814,13 +878,13 @@ function renderOverview(){
   var gadsCPrev=filterByRange(DATA.Gads_Campagnes||[],prev.from,prev.to);
   var ga4EPrev=filterByRange(DATA.Ga4_Ecommerce||[],prev.from,prev.to);
   var prevSpend=metaCPrev.reduce(function(s,r){return s+pN(r['Cost (EUR)'])},0)+gadsCPrev.reduce(function(s,r){return s+pN(r['Cost (EUR)'])},0);
-  var prevSVOD=metaCPrev.reduce(function(s,r){return s+pN(r['Website purchases'])},0)+gadsCPrev.reduce(function(s,r){return s+pN(r['Conversions'])},0);
+  var metaConvPrev=filterByRange(DATA.Meta_Conversions||[],prev.from,prev.to);
+  var gadsConvPrev=filterByRange(DATA.Gads_Conversions||[],prev.from,prev.to);
+  var prevSVOD=metaConvPrev.reduce(function(s,r){return s+pN(r['Purchase SVOD Mensuel Classique'])+pN(r['Purchase SVOD Annuel'])+pN(r['Purchase SVOD SOONER+'])},0)+gadsConvPrev.reduce(function(s,r){var n=(r['Conversion type name']||'').toLowerCase();return n.indexOf('abonnement')!==-1?s+pN(r['Conversions']):s},0);
   var prevCPA=prevSVOD>0?prevSpend/prevSVOD:0;
-  var prevRevMeta=metaCPrev.reduce(function(s,r){return s+pN(r['Website purchases conversion value'])},0);
-  var prevRev=prevRevMeta;
-  var prevRoas=prevSpend>0?prevRevMeta/prevSpend:0;
-  var prevGA4TotalPurch=ga4EPrev.reduce(function(s,r){return s+pN(r['Purchases'])},0);
-  var prevTVOD=Math.max(0,prevGA4TotalPurch-prevSVOD);
+  var prevRev=metaConvPrev.reduce(function(s,r){return s+pN(r['Purchase SVOD Mensuel Classique conversion value'])+pN(r['Purchase SVOD Annuel conversion value'])+pN(r['Purchase SVOD SOONER+ conversion value'])},0)+gadsConvPrev.reduce(function(s,r){var n=(r['Conversion type name']||'').toLowerCase();return n.indexOf('abonnement')!==-1?s+pN(r['Total conversion value']):s},0);
+  var prevRoas=prevSpend>0?prevRev/prevSpend:0;
+  var prevTVOD=metaConvPrev.reduce(function(s,r){return s+pN(r['Purchase TVOD Achat'])+pN(r['Purchase TVOD Location'])},0)+gadsConvPrev.reduce(function(s,r){var n=(r['Conversion type name']||'').toLowerCase();return(n.indexOf('tvod')!==-1||n.indexOf('location')!==-1)?s+pN(r['Conversions']):s},0);
 
   function chg(cur,prev){return prev>0?((cur-prev)/prev)*100:0}
 
@@ -840,7 +904,7 @@ function renderOverview(){
     kpiCardHTML('ov-kpi-cpa',icons[2],fmtE(cpaSVOD),'CPA SVOD',chg(cpaSVOD,prevCPA)*-1,'ov-spark-2'),
     kpiCardHTML('ov-kpi-rev',icons[3],fmtE(totalRevSVOD),'Revenu SVOD',chg(totalRevSVOD,prevRev),'ov-spark-3'),
     kpiCardHTML('ov-kpi-roas',icons[4],roas.toFixed(2)+'x','ROAS',chg(roas,prevRoas),'ov-spark-4'),
-    kpiCardHTML('ov-kpi-tvod',icons[5],fmt(tvodPurch),'Achats TVOD',chg(tvodPurch,prevTVOD),'ov-spark-5'),
+    kpiCardHTML('ov-kpi-tvod',icons[5],fmt(totalTVOD),'Achats TVOD',chg(totalTVOD,prevTVOD),'ov-spark-5'),
   ].join('');
 
   // Color CPA
@@ -849,8 +913,10 @@ function renderOverview(){
 
   // Daily data for sparklines and charts
   var dailyMap={};
-  metaC.forEach(function(r){var d=r.Date;if(!dailyMap[d])dailyMap[d]={spend:0,svod:0,rev:0};dailyMap[d].spend+=pN(r['Cost (EUR)']);dailyMap[d].svod+=pN(r['Website purchases']);dailyMap[d].rev+=pN(r['Website purchases conversion value'])});
-  gadsC.forEach(function(r){var d=r.Date;if(!dailyMap[d])dailyMap[d]={spend:0,svod:0,rev:0};dailyMap[d].spend+=pN(r['Cost (EUR)']);dailyMap[d].svod+=pN(r['Conversions'])});
+  metaC.forEach(function(r){var d=r.Date;if(!dailyMap[d])dailyMap[d]={spend:0,svod:0,tvod:0,rev:0};dailyMap[d].spend+=pN(r['Cost (EUR)'])});
+  gadsC.forEach(function(r){var d=r.Date;if(!dailyMap[d])dailyMap[d]={spend:0,svod:0,tvod:0,rev:0};dailyMap[d].spend+=pN(r['Cost (EUR)'])});
+  metaConv.forEach(function(r){var d=r.Date;if(!dailyMap[d])dailyMap[d]={spend:0,svod:0,tvod:0,rev:0};dailyMap[d].svod+=pN(r['Purchase SVOD Mensuel Classique'])+pN(r['Purchase SVOD Annuel'])+pN(r['Purchase SVOD SOONER+']);dailyMap[d].tvod+=pN(r['Purchase TVOD Achat'])+pN(r['Purchase TVOD Location']);dailyMap[d].rev+=pN(r['Purchase SVOD Mensuel Classique conversion value'])+pN(r['Purchase SVOD Annuel conversion value'])+pN(r['Purchase SVOD SOONER+ conversion value'])});
+  gadsConv.forEach(function(r){var d=r.Date;if(!dailyMap[d])dailyMap[d]={spend:0,svod:0,tvod:0,rev:0};var name=(r['Conversion type name']||'').toLowerCase();if(name.indexOf('abonnement')!==-1){dailyMap[d].svod+=pN(r['Conversions']);dailyMap[d].rev+=pN(r['Total conversion value'])}if(name.indexOf('tvod')!==-1||name.indexOf('location')!==-1){dailyMap[d].tvod+=pN(r['Conversions'])}});
   var sortedDays=Object.keys(dailyMap).sort();
   var spendArr=sortedDays.map(function(d){return dailyMap[d].spend});
   var svodArr=sortedDays.map(function(d){return dailyMap[d].svod});
@@ -863,8 +929,7 @@ function renderOverview(){
   drawSparkline('ov-spark-3',revArr,'#27AE60');
   drawSparkline('ov-spark-4',sortedDays.map(function(d){return dailyMap[d].rev>0&&dailyMap[d].spend>0?dailyMap[d].rev/dailyMap[d].spend:0}),'#3498DB');
 
-  var tvodDaily={};
-  drawSparkline('ov-spark-5',sortedDays.map(function(d){return tvodDaily[d]||0}),'#3498DB');
+  drawSparkline('ov-spark-5',sortedDays.map(function(d){return dailyMap[d].tvod||0}),'#3498DB');
 
   // ---- Bloc B: Charts ----
   var dayLabels=sortedDays.map(function(d){var p=parseDate(d);return p?p.toLocaleDateString('fr-FR',{day:'2-digit',month:'short'}):'?'});
@@ -888,7 +953,7 @@ function renderOverview(){
 
   // SVOD vs TVOD bar
   destroyChart('ovSvodTvod');
-  var tvodDailyArr=sortedDays.map(function(d){return tvodDaily[d]||0});
+  var tvodDailyArr=sortedDays.map(function(d){return dailyMap[d].tvod||0});
   var ctx2=document.getElementById('ov-chart-svod-tvod');
   if(ctx2){
     charts.ovSvodTvod=new Chart(ctx2,{
@@ -919,34 +984,39 @@ function renderOverview(){
   if(ctxD2){
     charts.ovDonutConv=new Chart(ctxD2,{
       type:'doughnut',
-      data:{labels:['META','Google Ads'],datasets:[{data:[metaPurch,gadsPurch],backgroundColor:['#6C5CE7','#3498DB'],hoverOffset:12,borderWidth:0}]},
+      data:{labels:['META SVOD','Google Ads SVOD'],datasets:[{data:[metaSvodPurch,gadsSvodPurch],backgroundColor:['#6C5CE7','#3498DB'],hoverOffset:12,borderWidth:0}]},
       options:{responsive:true,cutout:'65%',plugins:{legend:{position:'bottom'}}}
     });
   }
 
   // ---- Bloc D: SVOD vs TVOD donut + table ----
-  // Since GA4 categories are all "(not set)", use Meta-based SVOD and approximated TVOD
-  var totalPurchAll=totalSVOD+tvodPurch;
+  var totalPurchAll=totalSVOD+totalTVOD;
 
   destroyChart('ovDonutST');
   var ctxD3=document.getElementById('ov-donut-svod-tvod');
   if(ctxD3){
     charts.ovDonutST=new Chart(ctxD3,{
       type:'doughnut',
-      data:{labels:['SVOD (Meta+GAds)','TVOD (approx.)'],datasets:[{data:[totalSVOD,tvodPurch],backgroundColor:['#AE00FF','#3498DB'],hoverOffset:12,borderWidth:0}]},
+      data:{labels:['SVOD ('+fmt(totalSVOD)+')','TVOD ('+fmt(totalTVOD)+')'],datasets:[{data:[totalSVOD,totalTVOD],backgroundColor:['#AE00FF','#3498DB'],hoverOffset:12,borderWidth:0}]},
       options:{responsive:true,cutout:'65%',plugins:{legend:{position:'bottom'}}}
     });
   }
 
   var stTbody=document.querySelector('#ov-table-svod-tvod tbody');
   if(stTbody){
-    var pctSVOD=totalPurchAll>0?((totalSVOD/totalPurchAll)*100):0;
-    var pctTVOD=totalPurchAll>0?((tvodPurch/totalPurchAll)*100):0;
+    var totalAllConv=totalSVOD+totalTVOD;
+    function stPct(v){return totalAllConv>0?fmtPct((v/totalAllConv)*100):'0 %'}
     stTbody.innerHTML=
-      '<tr><td>SVOD</td><td>'+fmt(totalSVOD)+'</td><td>'+fmtE(metaRevenue)+'</td><td>'+cpaHtml(cpaSVOD)+'</td><td>'+fmtPct(pctSVOD)+'</td></tr>'+
-      '<tr><td>TVOD (approx.)</td><td>'+fmt(tvodPurch)+'</td><td>'+fmtE(tvodRev)+'</td><td>\u2014</td><td>'+fmtPct(pctTVOD)+'</td></tr>'+
-      '<tr><td colspan="5" style="font-size:11px;color:var(--text3);padding-top:8px"><em>Cat\u00e9gories GA4 non d\u00e9finies \u2014 TVOD = GA4 total \u2212 Meta revenue (approximation)</em></td></tr>'+
-      '<tr style="font-weight:700;border-top:2px solid var(--card-border)"><td>Total</td><td>'+fmt(totalPurchAll)+'</td><td>'+fmtE(metaRevenue+tvodRev)+'</td><td>\u2014</td><td>100 %</td></tr>';
+      '<tr style="background:rgba(174,0,255,0.06);font-weight:600"><td colspan="5">SVOD</td></tr>'+
+      '<tr><td style="padding-left:20px">Abo Mensuel Classique</td><td>'+fmt(lineAboMensuel)+'</td><td>'+fmtE(lineAboMensuelRev)+'</td><td>'+(lineAboMensuel>0?cpaHtml(totalSpend/totalSVOD):'\u2014')+'</td><td>'+stPct(lineAboMensuel)+'</td></tr>'+
+      '<tr><td style="padding-left:20px">Abo Annuel</td><td>'+fmt(lineAboAnnuel)+'</td><td>'+fmtE(lineAboAnnuelRev)+'</td><td>'+(lineAboAnnuel>0?cpaHtml(totalSpend/totalSVOD):'\u2014')+'</td><td>'+stPct(lineAboAnnuel)+'</td></tr>'+
+      '<tr><td style="padding-left:20px">Abo SOONER+</td><td>'+fmt(lineAboPlus)+'</td><td>'+fmtE(lineAboPlusRev)+'</td><td>'+(lineAboPlus>0?cpaHtml(totalSpend/totalSVOD):'\u2014')+'</td><td>'+stPct(lineAboPlus)+'</td></tr>'+
+      '<tr style="font-weight:600;border-top:1px solid var(--card-border)"><td>Sous-total SVOD</td><td>'+fmt(totalSVOD)+'</td><td>'+fmtE(totalRevSVOD)+'</td><td>'+cpaHtml(cpaSVOD)+'</td><td>'+stPct(totalSVOD)+'</td></tr>'+
+      '<tr style="background:rgba(52,152,219,0.06);font-weight:600"><td colspan="5">TVOD</td></tr>'+
+      '<tr><td style="padding-left:20px">TVOD Location</td><td>'+fmt(lineTvodLoc)+'</td><td>'+fmtE(lineTvodLocRev)+'</td><td>\u2014</td><td>'+stPct(lineTvodLoc)+'</td></tr>'+
+      '<tr><td style="padding-left:20px">TVOD Achat</td><td>'+fmt(lineTvodAchat)+'</td><td>'+fmtE(lineTvodAchatRev)+'</td><td>\u2014</td><td>'+stPct(lineTvodAchat)+'</td></tr>'+
+      '<tr style="font-weight:600;border-top:1px solid var(--card-border)"><td>Sous-total TVOD</td><td>'+fmt(totalTVOD)+'</td><td>'+fmtE(totalRevTVOD)+'</td><td>\u2014</td><td>'+stPct(totalTVOD)+'</td></tr>'+
+      '<tr style="font-weight:700;border-top:2px solid var(--card-border)"><td>Total</td><td>'+fmt(totalPurchAll)+'</td><td>'+fmtE(totalRevSVOD+totalRevTVOD)+'</td><td>\u2014</td><td>100 %</td></tr>';
   }
 }
 
@@ -960,7 +1030,10 @@ function renderMeta(){
   var metaConv=filterByDate(DATA.Meta_Conversions||[]);
 
   var spend=metaC.reduce(function(s,r){return s+pN(r['Cost (EUR)'])},0);
-  var purch=metaC.reduce(function(s,r){return s+pN(r['Website purchases'])},0);
+  // SVOD-only purchases from Meta_Conversions
+  var purch=metaConv.reduce(function(s,r){
+    return s+pN(r['Purchase SVOD Mensuel Classique'])+pN(r['Purchase SVOD Annuel'])+pN(r['Purchase SVOD SOONER+']);
+  },0);
   var cpa=purch>0?spend/purch:0;
   var clicks=metaC.reduce(function(s,r){return s+pN(r['Link clicks'])},0);
   var imps=metaC.reduce(function(s,r){return s+pN(r['Impressions'])},0);
@@ -971,8 +1044,9 @@ function renderMeta(){
   // Previous
   var prev=getPrevRange();
   var pC=filterByRange(DATA.Meta_Campagnes||[],prev.from,prev.to);
+  var pMetaConv=filterByRange(DATA.Meta_Conversions||[],prev.from,prev.to);
   var pSpend=pC.reduce(function(s,r){return s+pN(r['Cost (EUR)'])},0);
-  var pPurch=pC.reduce(function(s,r){return s+pN(r['Website purchases'])},0);
+  var pPurch=pMetaConv.reduce(function(s,r){return s+pN(r['Purchase SVOD Mensuel Classique'])+pN(r['Purchase SVOD Annuel'])+pN(r['Purchase SVOD SOONER+'])},0);
   var pCPA=pPurch>0?pSpend/pPurch:0;
   var pClicks=pC.reduce(function(s,r){return s+pN(r['Link clicks'])},0);
   var pImps=pC.reduce(function(s,r){return s+pN(r['Impressions'])},0);
@@ -993,8 +1067,8 @@ function renderMeta(){
   var grid=document.getElementById('meta-kpis');
   grid.innerHTML=[
     kpiCardHTML('m-kpi-0',icons[0],fmtE(spend),'D\u00e9penses',chg(spend,pSpend),'m-spark-0'),
-    kpiCardHTML('m-kpi-1',icons[1],fmt(purch),'Achats SVOD',chg(purch,pPurch),'m-spark-1'),
-    kpiCardHTML('m-kpi-2',icons[2],fmtE(cpa),'CPA SVOD',chg(cpa,pCPA)*-1,'m-spark-2'),
+    kpiCardHTML('m-kpi-1',icons[1],fmt(purch),'Achats (SVOD)',chg(purch,pPurch),'m-spark-1'),
+    kpiCardHTML('m-kpi-2',icons[2],fmtE(cpa),'CPA (SVOD)',chg(cpa,pCPA)*-1,'m-spark-2'),
     kpiCardHTML('m-kpi-3',icons[3],fmtPct(ctrAvg),'CTR moyen',chg(ctrAvg,pCTR),'m-spark-3'),
     kpiCardHTML('m-kpi-4',icons[4],fmtE(cpcAvg),'CPC moyen',chg(cpcAvg,pCPC)*-1,'m-spark-4'),
     kpiCardHTML('m-kpi-5',icons[5],fmt(reach),'Reach',chg(reach,pReach),'m-spark-5'),
@@ -1472,25 +1546,24 @@ function renderGa4(){
 function renderBilan(){
   var metaAll=DATA.Meta_Campagnes||[];
   var gadsAll=DATA.Gads_Campagnes||[];
-  var ga4EAll=DATA.Ga4_Ecommerce||[];
+  var metaConvAll=DATA.Meta_Conversions||[];
+  var gadsConvAll=DATA.Gads_Conversions||[];
 
   function getMonthData(year,month){
     var from=new Date(year,month,1);
     var to=new Date(year,month+1,0);
     var mC=filterByRange(metaAll,from,to);
     var gC=filterByRange(gadsAll,from,to);
-    var eC=filterByRange(ga4EAll,from,to);
+    var mConv=filterByRange(metaConvAll,from,to);
+    var gConv=filterByRange(gadsConvAll,from,to);
     var metaSpend=mC.reduce(function(s,r){return s+pN(r['Cost (EUR)'])},0);
     var gadsSpend=gC.reduce(function(s,r){return s+pN(r['Cost (EUR)'])},0);
     var spend=metaSpend+gadsSpend;
-    var svod=mC.reduce(function(s,r){return s+pN(r['Website purchases'])},0)+gC.reduce(function(s,r){return s+pN(r['Conversions'])},0);
+    var svod=mConv.reduce(function(s,r){return s+pN(r['Purchase SVOD Mensuel Classique'])+pN(r['Purchase SVOD Annuel'])+pN(r['Purchase SVOD SOONER+'])},0)+gConv.reduce(function(s,r){var n=(r['Conversion type name']||'').toLowerCase();return n.indexOf('abonnement')!==-1?s+pN(r['Conversions']):s},0);
     var cpa=svod>0?spend/svod:0;
-    var revMeta=mC.reduce(function(s,r){return s+pN(r['Website purchases conversion value'])},0);
-    // Revenue SVOD = Meta revenue only (GA4 categories are all "(not set)")
-    var rev=revMeta;
-    var roas=spend>0?revMeta/spend:0;
-    var ga4TotalPurch=eC.reduce(function(s,r){return s+pN(r['Purchases'])},0);
-    var tvodPurch=Math.max(0,ga4TotalPurch-svod);
+    var rev=mConv.reduce(function(s,r){return s+pN(r['Purchase SVOD Mensuel Classique conversion value'])+pN(r['Purchase SVOD Annuel conversion value'])+pN(r['Purchase SVOD SOONER+ conversion value'])},0)+gConv.reduce(function(s,r){var n=(r['Conversion type name']||'').toLowerCase();return n.indexOf('abonnement')!==-1?s+pN(r['Total conversion value']):s},0);
+    var roas=spend>0?rev/spend:0;
+    var tvodPurch=mConv.reduce(function(s,r){return s+pN(r['Purchase TVOD Achat'])+pN(r['Purchase TVOD Location'])},0)+gConv.reduce(function(s,r){var n=(r['Conversion type name']||'').toLowerCase();return(n.indexOf('tvod')!==-1||n.indexOf('location')!==-1)?s+pN(r['Conversions']):s},0);
     var svodPurch=svod;
     return{spend:spend,svod:svod,cpa:cpa,rev:rev,roas:roas,metaSpend:metaSpend,gadsSpend:gadsSpend,tvodPurch:tvodPurch,svodPurch:svodPurch};
   }
@@ -1590,19 +1663,18 @@ function exportCSV(){
   var range=getDateRange();
   var lines=[];
 
-  // Overview KPIs
+  // Overview KPIs (SVOD-only)
   var metaC=filterByDate(DATA.Meta_Campagnes||[]);
   var gadsC=filterByDate(DATA.Gads_Campagnes||[]);
-  var ga4E=filterByDate(DATA.Ga4_Ecommerce||[]);
+  var csvMetaConv=filterByDate(DATA.Meta_Conversions||[]);
+  var csvGadsConv=filterByDate(DATA.Gads_Conversions||[]);
   var metaSpend=metaC.reduce(function(s,r){return s+pN(r['Cost (EUR)'])},0);
   var gadsSpend=gadsC.reduce(function(s,r){return s+pN(r['Cost (EUR)'])},0);
-  var metaPurch=metaC.reduce(function(s,r){return s+pN(r['Website purchases'])},0);
-  var gadsPurch=gadsC.reduce(function(s,r){return s+pN(r['Conversions'])},0);
   var totalSpend=metaSpend+gadsSpend;
-  var totalSVOD=metaPurch+gadsPurch;
+  var totalSVOD=csvMetaConv.reduce(function(s,r){return s+pN(r['Purchase SVOD Mensuel Classique'])+pN(r['Purchase SVOD Annuel'])+pN(r['Purchase SVOD SOONER+'])},0)+csvGadsConv.reduce(function(s,r){var n=(r['Conversion type name']||'').toLowerCase();return n.indexOf('abonnement')!==-1?s+pN(r['Conversions']):s},0);
   var cpaSVOD=totalSVOD>0?totalSpend/totalSVOD:0;
-  var metaRev=metaC.reduce(function(s,r){return s+pN(r['Website purchases conversion value'])},0);
-  var roas=totalSpend>0?metaRev/totalSpend:0;
+  var csvSvodRev=csvMetaConv.reduce(function(s,r){return s+pN(r['Purchase SVOD Mensuel Classique conversion value'])+pN(r['Purchase SVOD Annuel conversion value'])+pN(r['Purchase SVOD SOONER+ conversion value'])},0)+csvGadsConv.reduce(function(s,r){var n=(r['Conversion type name']||'').toLowerCase();return n.indexOf('abonnement')!==-1?s+pN(r['Total conversion value']):s},0);
+  var roas=totalSpend>0?csvSvodRev/totalSpend:0;
 
   lines.push('SOONER - Rapport Marketing');
   lines.push('Periode:,'+range.from.toLocaleDateString('fr-FR')+' - '+range.to.toLocaleDateString('fr-FR'));
@@ -1613,7 +1685,7 @@ function exportCSV(){
     if(selected.indexOf('spend')!==-1) lines.push('Depenses totales,'+totalSpend.toFixed(2));
     if(selected.indexOf('svod')!==-1) lines.push('Achats SVOD,'+totalSVOD.toFixed(0));
     if(selected.indexOf('cpa')!==-1) lines.push('CPA SVOD,'+cpaSVOD.toFixed(2));
-    if(selected.indexOf('revenue')!==-1) lines.push('Revenu SVOD,'+metaRev.toFixed(2));
+    if(selected.indexOf('revenue')!==-1) lines.push('Revenu SVOD,'+csvSvodRev.toFixed(2));
     if(selected.indexOf('roas')!==-1) lines.push('ROAS,'+roas.toFixed(2));
     lines.push('');
   }
@@ -1666,14 +1738,14 @@ async function exportPDF(){
     var range=getDateRange();
     var metaC=filterByDate(DATA.Meta_Campagnes||[]);
     var gadsC=filterByDate(DATA.Gads_Campagnes||[]);
+    var pdfMetaConv=filterByDate(DATA.Meta_Conversions||[]);
+    var pdfGadsConv=filterByDate(DATA.Gads_Conversions||[]);
     var metaSpend=metaC.reduce(function(s,r){return s+pN(r['Cost (EUR)'])},0);
     var gadsSpend=gadsC.reduce(function(s,r){return s+pN(r['Cost (EUR)'])},0);
     var totalSpend=metaSpend+gadsSpend;
-    var metaPurch=metaC.reduce(function(s,r){return s+pN(r['Website purchases'])},0);
-    var gadsPurch=gadsC.reduce(function(s,r){return s+pN(r['Conversions'])},0);
-    var totalSVOD=metaPurch+gadsPurch;
+    var totalSVOD=pdfMetaConv.reduce(function(s,r){return s+pN(r['Purchase SVOD Mensuel Classique'])+pN(r['Purchase SVOD Annuel'])+pN(r['Purchase SVOD SOONER+'])},0)+pdfGadsConv.reduce(function(s,r){var n=(r['Conversion type name']||'').toLowerCase();return n.indexOf('abonnement')!==-1?s+pN(r['Conversions']):s},0);
     var cpaSVOD=totalSVOD>0?totalSpend/totalSVOD:0;
-    var metaRev=metaC.reduce(function(s,r){return s+pN(r['Website purchases conversion value'])},0);
+    var metaRev=pdfMetaConv.reduce(function(s,r){return s+pN(r['Purchase SVOD Mensuel Classique conversion value'])+pN(r['Purchase SVOD Annuel conversion value'])+pN(r['Purchase SVOD SOONER+ conversion value'])},0)+pdfGadsConv.reduce(function(s,r){var n=(r['Conversion type name']||'').toLowerCase();return n.indexOf('abonnement')!==-1?s+pN(r['Total conversion value']):s},0);
     var roasVal=totalSpend>0?metaRev/totalSpend:0;
 
     var doc=new window.jspdf.jsPDF('p','mm','a4');
