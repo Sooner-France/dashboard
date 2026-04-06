@@ -1413,8 +1413,8 @@ function renderGa4(){
     kpiCardHTML('ga-kpi-2',icons[2],fmt(newUsers),'Nouveaux utilisateurs',chg(newUsers,pNew),'ga-spark-2'),
     kpiCardHTML('ga-kpi-3',icons[3],fmtPct(engRate*100),'Taux d\u2019engagement',0,'ga-spark-3'),
     kpiCardHTML('ga-kpi-4',icons[4],fmtDur(avgDur),'Dur\u00e9e moyenne',0,'ga-spark-4'),
-    kpiCardHTML('ga-kpi-5',icons[5],fmt(purchases),'Achats',chg(purchases,pPurch),'ga-spark-5'),
-    kpiCardHTML('ga-kpi-6',icons[6],fmtE(revenue),'Revenu',chg(revenue,pRev),'ga-spark-6'),
+    kpiCardHTML('ga-kpi-5',icons[5],fmt(purchases),'Achats (SVOD + TVOD)',chg(purchases,pPurch),'ga-spark-5'),
+    kpiCardHTML('ga-kpi-6',icons[6],fmtE(revenue),'Revenu (SVOD + TVOD)',chg(revenue,pRev),'ga-spark-6'),
   ].join('');
 
   // Acquisition horizontal bar
