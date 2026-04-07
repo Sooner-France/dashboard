@@ -1737,13 +1737,22 @@ function renderBilan(){
     });
   }
 
-  // Donuts
+  // Donuts — use global date filter (not just current month)
+  var metaFiltered=filterByDate(metaAll);
+  var gadsFiltered=filterByDate(gadsAll);
+  var metaConvFiltered=filterByDate(metaConvAll);
+  var gadsConvFiltered=filterByDate(gadsConvAll);
+  var dMetaSpend=metaFiltered.reduce(function(s,r){return s+pN(r['Cost (EUR)'])},0);
+  var dGadsSpend=gadsFiltered.reduce(function(s,r){return s+pN(r['Cost (EUR)'])},0);
+  var dSvod=metaConvFiltered.reduce(function(s,r){return s+pN(r['Purchase SVOD Mensuel Classique'])+pN(r['Purchase SVOD Annuel'])+pN(r['Purchase SVOD SOONER+'])},0)+gadsConvFiltered.reduce(function(s,r){var n=(r['Conversion type name']||'').toLowerCase();return n.indexOf('abonnement')!==-1?s+pN(r['Conversions']):s},0);
+  var dTvod=metaConvFiltered.reduce(function(s,r){return s+pN(r['Purchase TVOD Achat'])+pN(r['Purchase TVOD Location'])},0)+gadsConvFiltered.reduce(function(s,r){var n=(r['Conversion type name']||'').toLowerCase();return(n.indexOf('tvod')!==-1||n.indexOf('location')!==-1)?s+pN(r['Conversions']):s},0);
+
   destroyChart('bilanDonutChannel');
   var ctxBC=document.getElementById('bilan-donut-channel');
   if(ctxBC){
     charts.bilanDonutChannel=new Chart(ctxBC,{
       type:'doughnut',
-      data:{labels:['META ('+fmtE(cur.metaSpend)+')','Programmatique ('+fmtE(cur.gadsSpend)+')'],datasets:[{data:[cur.metaSpend,cur.gadsSpend],backgroundColor:['#6C5CE7','#3498DB'],hoverOffset:12,borderWidth:0}]},
+      data:{labels:['META ('+fmtE(dMetaSpend)+')','Programmatique ('+fmtE(dGadsSpend)+')'],datasets:[{data:[dMetaSpend,dGadsSpend],backgroundColor:['#6C5CE7','#3498DB'],hoverOffset:12,borderWidth:0}]},
       options:{responsive:true,cutout:'65%',plugins:{legend:{position:'bottom'}}}
     });
   }
@@ -1752,7 +1761,7 @@ function renderBilan(){
   if(ctxBT){
     charts.bilanDonutType=new Chart(ctxBT,{
       type:'doughnut',
-      data:{labels:['SVOD ('+fmt(cur.svodPurch)+')','TVOD ('+fmt(cur.tvodPurch)+')'],datasets:[{data:[cur.svodPurch,cur.tvodPurch],backgroundColor:['#AE00FF','#3498DB'],hoverOffset:12,borderWidth:0}]},
+      data:{labels:['SVOD ('+fmt(dSvod)+')','TVOD ('+fmt(dTvod)+')'],datasets:[{data:[dSvod,dTvod],backgroundColor:['#AE00FF','#3498DB'],hoverOffset:12,borderWidth:0}]},
       options:{responsive:true,cutout:'65%',plugins:{legend:{position:'bottom'}}}
     });
   }
