@@ -1272,21 +1272,22 @@ function renderMeta(){
   }).join('');
   makeSortable('meta-adsets-table');
 
-  // Top 10 Creatives by purchases desc (with thumbnails from Meta API)
+  // Top 10 Creatives by purchases desc (thumbnails from CSV column 'Thumbnail URL')
   var adMap={};
   metaAds.forEach(function(r){
     var k=(r['Ad name']||'')+'|||'+(r['Ad set name']||'')+'|||'+(r['Campaign name']||'');
-    if(!adMap[k])adMap[k]={ad:r['Ad name']||'',adset:r['Ad set name']||'',campaign:r['Campaign name']||'',spend:0,purch:0,clicks:0,imps:0,thruplay:0};
+    if(!adMap[k])adMap[k]={ad:r['Ad name']||'',adset:r['Ad set name']||'',campaign:r['Campaign name']||'',spend:0,purch:0,clicks:0,imps:0,thruplay:0,thumb:''};
     adMap[k].spend+=pN(r['Cost (EUR)']);
     adMap[k].purch+=pN(r['Website purchases']);
     adMap[k].clicks+=pN(r['Link clicks']);
     adMap[k].imps+=pN(r['Impressions']);
     adMap[k].thruplay+=pN(r['ThruPlay actions']);
+    if(!adMap[k].thumb&&r['Thumbnail URL'])adMap[k].thumb=r['Thumbnail URL'];
   });
   var adArr=Object.keys(adMap).map(function(k){return adMap[k]}).sort(function(a,b){return b.purch-a.purch}).slice(0,10);
   var adTbody=document.querySelector('#meta-ads-table tbody');
   adTbody.innerHTML=adArr.map(function(a){
-    var thumb=adThumbnails[a.ad];
+    var thumb=a.thumb||adThumbnails[a.ad]||'';
     var thumbHtml=thumb?'<img class="crea-thumb" src="'+thumb+'" alt="" loading="lazy" onerror="this.outerHTML=\'<div class=crea-thumb-empty>N/A</div>\'">':'<div class="crea-thumb-empty">...</div>';
     return '<tr>'+
       '<td>'+thumbHtml+'</td>'+
