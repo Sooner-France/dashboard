@@ -102,6 +102,8 @@ tbody tr:nth-child(even){background:rgba(174,0,255,0.02)}
 tbody tr:hover{background:rgba(174,0,255,0.06)}
 tbody td{padding:10px 12px;white-space:nowrap}
 .cpa-val{font-weight:600;padding:3px 8px;border-radius:6px;display:inline-block}
+.crea-thumb{width:52px;height:52px;border-radius:8px;object-fit:cover;border:1px solid var(--card-border);background:var(--bg2)}
+.crea-thumb-empty{width:52px;height:52px;border-radius:8px;background:var(--bg2);border:1px solid var(--card-border);display:flex;align-items:center;justify-content:center;font-size:9px;color:var(--text3)}
 .cpa-green{color:var(--cpa-green);background:rgba(39,174,96,0.1)}
 .cpa-orange{color:var(--cpa-orange);background:rgba(230,126,34,0.1)}
 .cpa-red{color:var(--cpa-red);background:rgba(231,76,60,0.1)}
@@ -305,7 +307,7 @@ Export
 <th>Ad Set</th><th>Campagne</th><th>D&eacute;penses</th><th>Achats</th><th>CPA</th><th>CTR</th>
 </tr></thead><tbody></tbody></table></div>
 <div class="table-card"><h3>Top 10 Cr&eacute;atives</h3><table id="meta-ads-table"><thead><tr>
-<th>Cr&eacute;ative</th><th>Ad Set</th><th>Campagne</th><th>D&eacute;penses</th><th>Achats</th><th>CPA</th><th>CTR</th><th>ThruPlay</th>
+<th style="width:60px">Visuel</th><th>Cr&eacute;ative</th><th>Ad Set</th><th>Campagne</th><th>D&eacute;penses</th><th>Achats</th><th>CPA</th><th>CTR</th><th>ThruPlay</th>
 </tr></thead><tbody></tbody></table></div>
 <div class="table-card"><h3>Conversions Meta</h3><table id="meta-conv-table"><thead><tr>
 <th>Campagne</th><th>SVOD Mensuel</th><th>SVOD Annuel</th><th>SVOD SOONER+</th><th>Total SVOD</th><th>TVOD Location</th><th>TVOD Achat</th><th>Total TVOD</th>
@@ -422,6 +424,11 @@ Sauvegarder
 
 const CPA_TARGET = 15;
 
+// ---- META API CONFIG (for creative thumbnails) ----
+const META_AD_ACCOUNT = 'act_1236233621681504';
+const META_TOKEN = 'EAHnlLwNmFncBRLt5Qsil0DQFHIZBiyHeCyQh666z3uN2ckJKPiYG4ExVQ8mo0nP9FsSGpoL3INBcBMoJo1qupZAIVeqZCFFZAApkrNpZBaTtILQ6bi2Rg3W3ZCoQzd9nWJKvxcZAzjnnALQ76ZCNinYI4fcdorhRK4QQ4ipZACQog02FxLwlyji0C1mmGkDxATA5avynqWjr3zmxZAdm4vV34V9EwNZBZAZApYTQYvMPi';
+let adThumbnails = {}; // {adName: thumbnailUrl}
+
 // ---- DATA CONFIG ----
 const BASE = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSZagUxarZFDcCcmYW8fd1eXI_21odFFSu2ptSPWbnGYkog-UuH77A4iXv4Vv3A2DG2HGUnEWMTmrsc/pub?output=csv&single=true&gid=';
 const GIDS = {
@@ -536,6 +543,34 @@ async function fetchAll(){
   }
 
   renderAll();
+  // Fetch thumbnails from Meta API (non-blocking)
+  fetchThumbnails();
+}
+
+async function fetchThumbnails(){
+  if(!META_TOKEN||!META_AD_ACCOUNT)return;
+  try{
+    console.log('[SOONER] Fetching creative thumbnails from Meta API...');
+    var url='https://graph.facebook.com/v21.0/'+META_AD_ACCOUNT+'/ads?fields=id,name&limit=100&access_token='+META_TOKEN;
+    var resp=await fetch(url);var json=await resp.json();
+    var ads=json.data||[];
+    console.log('[SOONER] Found '+ads.length+' ads, fetching thumbnails...');
+    // Batch: fetch 5 at a time
+    for(var i=0;i<ads.length;i+=5){
+      var batch=ads.slice(i,i+5);
+      await Promise.all(batch.map(async function(ad){
+        try{
+          var r=await fetch('https://graph.facebook.com/v21.0/'+ad.id+'?fields=name,creative.fields(thumbnail_url)&access_token='+META_TOKEN);
+          var d=await r.json();
+          var thumb=d.creative&&d.creative.thumbnail_url;
+          if(thumb){adThumbnails[d.name]=thumb}
+        }catch(e){}
+      }));
+    }
+    console.log('[SOONER] Thumbnails loaded: '+Object.keys(adThumbnails).length);
+    // Re-render Meta page to inject thumbnails
+    try{renderMeta()}catch(e){}
+  }catch(e){console.warn('[SOONER] Thumbnail fetch failed:',e)}
 }
 
 // ---- DATE FILTERING ----
@@ -1186,8 +1221,7 @@ function renderMeta(){
   }).join('');
   makeSortable('meta-adsets-table');
 
-  // Top 10 Creatives by purchases desc
-  // TODO: Add thumbnail when 'Ad creative thumbnail URL' is available in Meta_ADS sheet
+  // Top 10 Creatives by purchases desc (with thumbnails from Meta API)
   var adMap={};
   metaAds.forEach(function(r){
     var k=(r['Ad name']||'')+'|||'+(r['Ad set name']||'')+'|||'+(r['Campaign name']||'');
@@ -1201,7 +1235,10 @@ function renderMeta(){
   var adArr=Object.keys(adMap).map(function(k){return adMap[k]}).sort(function(a,b){return b.purch-a.purch}).slice(0,10);
   var adTbody=document.querySelector('#meta-ads-table tbody');
   adTbody.innerHTML=adArr.map(function(a){
+    var thumb=adThumbnails[a.ad];
+    var thumbHtml=thumb?'<img class="crea-thumb" src="'+thumb+'" alt="" loading="lazy" onerror="this.outerHTML=\'<div class=crea-thumb-empty>N/A</div>\'">':'<div class="crea-thumb-empty">...</div>';
     return '<tr>'+
+      '<td>'+thumbHtml+'</td>'+
       '<td style="max-width:160px;overflow:hidden;text-overflow:ellipsis" title="'+a.ad+'">'+a.ad+'</td>'+
       '<td style="max-width:120px;overflow:hidden;text-overflow:ellipsis">'+a.adset+'</td>'+
       '<td style="max-width:120px;overflow:hidden;text-overflow:ellipsis">'+a.campaign+'</td>'+
