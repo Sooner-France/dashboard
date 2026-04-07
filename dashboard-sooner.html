@@ -1336,9 +1336,10 @@ function renderGads(){
 
   var cost=gC.reduce(function(s,r){return s+pN(r['Cost (EUR)'])},0);
   var clicks=gC.reduce(function(s,r){return s+pN(r['Clicks'])},0);
-  var conv=gC.reduce(function(s,r){return s+pN(r['Conversions'])},0);
   var allConv=gC.reduce(function(s,r){return s+pN(r['All conversions'])},0);
   var imps=gC.reduce(function(s,r){return s+pN(r['Impressions'])},0);
+  // SVOD only from Gads_Conversions (filter on "Abonnement")
+  var conv=gConv.reduce(function(s,r){var n=(r['Conversion type name']||'').toLowerCase();return n.indexOf('abonnement')!==-1?s+pN(r['Conversions']):s},0);
   var cpa=conv>0?cost/conv:0;
   var ctr=imps>0?(clicks/imps)*100:0;
   var cpc=clicks>0?cost/clicks:0;
@@ -1348,8 +1349,9 @@ function renderGads(){
   var pG=filterByRange(DATA.Gads_Campagnes||[],prev.from,prev.to);
   var pCost=pG.reduce(function(s,r){return s+pN(r['Cost (EUR)'])},0);
   var pClicks=pG.reduce(function(s,r){return s+pN(r['Clicks'])},0);
-  var pConv=pG.reduce(function(s,r){return s+pN(r['Conversions'])},0);
   var pImps=pG.reduce(function(s,r){return s+pN(r['Impressions'])},0);
+  var pGConv=filterByRange(DATA.Gads_Conversions||[],prev.from,prev.to);
+  var pConv=pGConv.reduce(function(s,r){var n=(r['Conversion type name']||'').toLowerCase();return n.indexOf('abonnement')!==-1?s+pN(r['Conversions']):s},0);
   var pCPA=pConv>0?pCost/pConv:0;
   var pCTR=pImps>0?(pClicks/pImps)*100:0;
   var pCPC=pClicks>0?pCost/pClicks:0;
@@ -1388,9 +1390,11 @@ function renderGads(){
     gCampMap[n].cost+=pN(r['Cost (EUR)']);
     gCampMap[n].imps+=pN(r['Impressions']);
     gCampMap[n].clicks+=pN(r['Clicks']);
-    gCampMap[n].conv+=pN(r['Conversions']);
     gCampMap[n].allConv+=pN(r['All conversions']);
   });
+  // Use SVOD conv from Gads_Conversions for each campaign (only 1 campaign so total = campaign)
+  var gadsSvodTotal=conv; // already computed above from Gads_Conversions
+  Object.keys(gCampMap).forEach(function(n){gCampMap[n].conv=gadsSvodTotal});
 
   function guessType(name){
     var n=name.toLowerCase();
