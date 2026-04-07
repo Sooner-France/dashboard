@@ -549,26 +549,40 @@ async function fetchAll(){
 
 async function fetchThumbnails(){
   if(!META_TOKEN||!META_AD_ACCOUNT)return;
+  // Check localStorage cache first (valid 24h)
   try{
-    console.log('[SOONER] Fetching creative thumbnails from Meta API...');
+    var cached=JSON.parse(localStorage.getItem('sooner_thumbs')||'{}');
+    if(cached.ts&&Date.now()-cached.ts<86400000&&cached.data&&Object.keys(cached.data).length>0){
+      adThumbnails=cached.data;
+      console.log('[SOONER] Thumbnails loaded from cache: '+Object.keys(adThumbnails).length);
+      try{renderMeta()}catch(e){}
+      return;
+    }
+  }catch(e){}
+  // Fetch from Meta API — single batch request with IDs
+  try{
+    console.log('[SOONER] Fetching thumbnails from Meta API...');
     var url='https://graph.facebook.com/v21.0/'+META_AD_ACCOUNT+'/ads?fields=id,name&limit=100&access_token='+META_TOKEN;
     var resp=await fetch(url);var json=await resp.json();
+    if(json.error){console.warn('[SOONER] Meta API error:',json.error.message);return}
     var ads=json.data||[];
-    console.log('[SOONER] Found '+ads.length+' ads, fetching thumbnails...');
-    // Batch: fetch 5 at a time
-    for(var i=0;i<ads.length;i+=5){
-      var batch=ads.slice(i,i+5);
-      await Promise.all(batch.map(async function(ad){
-        try{
-          var r=await fetch('https://graph.facebook.com/v21.0/'+ad.id+'?fields=name,creative.fields(thumbnail_url)&access_token='+META_TOKEN);
-          var d=await r.json();
-          var thumb=d.creative&&d.creative.thumbnail_url;
-          if(thumb){adThumbnails[d.name]=thumb}
-        }catch(e){}
-      }));
+    console.log('[SOONER] Found '+ads.length+' ads');
+    // Use batch API: fetch 50 at a time with a single request using ?ids=
+    for(var i=0;i<ads.length;i+=50){
+      var batch=ads.slice(i,i+50);
+      var ids=batch.map(function(a){return a.id}).join(',');
+      try{
+        var r=await fetch('https://graph.facebook.com/v21.0/?ids='+ids+'&fields=name,creative.fields(thumbnail_url)&access_token='+META_TOKEN);
+        var d=await r.json();
+        if(d.error){console.warn('[SOONER] Batch error:',d.error.message);break}
+        Object.values(d).forEach(function(ad){
+          if(ad.creative&&ad.creative.thumbnail_url){adThumbnails[ad.name]=ad.creative.thumbnail_url}
+        });
+      }catch(e){console.warn('[SOONER] Batch fetch error:',e)}
     }
     console.log('[SOONER] Thumbnails loaded: '+Object.keys(adThumbnails).length);
-    // Re-render Meta page to inject thumbnails
+    // Cache in localStorage (24h)
+    try{localStorage.setItem('sooner_thumbs',JSON.stringify({ts:Date.now(),data:adThumbnails}))}catch(e){}
     try{renderMeta()}catch(e){}
   }catch(e){console.warn('[SOONER] Thumbnail fetch failed:',e)}
 }
