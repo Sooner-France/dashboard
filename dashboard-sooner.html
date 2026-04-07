@@ -229,7 +229,7 @@ tbody td{padding:10px 12px;white-space:nowrap}
 </div>
 <div class="nav-item" data-page="gads">
 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
-<span>Google Ads</span>
+<span>Programmatique</span>
 </div>
 <div class="nav-item" data-page="ga4">
 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
@@ -298,7 +298,7 @@ Export
 <div class="page" id="page-meta">
 <div class="kpi-grid" id="meta-kpis"></div>
 <div class="table-card"><h3>Campagnes Meta</h3><table id="meta-camp-table"><thead><tr>
-<th data-col="campaign">Campagne</th><th data-col="spend">D&eacute;penses</th><th data-col="impressions">Impressions</th><th data-col="reach">Reach</th><th data-col="clicks">Clics</th><th data-col="ctr">CTR</th><th data-col="cpc">CPC</th><th data-col="purchases">Achats</th><th data-col="cpa">CPA</th><th data-col="freq">Fr&eacute;quence</th>
+<th data-col="campaign">Campagne</th><th data-col="spend">D&eacute;penses</th><th data-col="impressions">Impressions</th><th data-col="reach">Reach</th><th data-col="clicks">Clics</th><th data-col="ctr">CTR</th><th data-col="cpc">CPC</th><th data-col="svod">SVOD</th><th data-col="tvod">TVOD</th><th data-col="cpa">CPA</th><th data-col="freq">Fr&eacute;quence</th>
 </tr></thead><tbody></tbody></table></div>
 <div class="chart-card full" style="margin-bottom:28px"><h3>CPA par Campagne</h3><canvas id="meta-cpa-chart"></canvas></div>
 <div class="table-card"><h3>Top 15 Ad Sets par CPA</h3><table id="meta-adsets-table"><thead><tr>
@@ -308,22 +308,22 @@ Export
 <th>Cr&eacute;ative</th><th>Ad Set</th><th>Campagne</th><th>D&eacute;penses</th><th>Achats</th><th>CPA</th><th>CTR</th><th>ThruPlay</th>
 </tr></thead><tbody></tbody></table></div>
 <div class="table-card"><h3>Conversions Meta</h3><table id="meta-conv-table"><thead><tr>
-<th>Campagne</th><th>Custom Conv</th><th>Achats</th><th>Valeur Achats</th><th>Leads</th><th>Add to Cart</th><th>Checkouts</th><th>ROAS</th>
+<th>Campagne</th><th>SVOD Mensuel</th><th>SVOD Annuel</th><th>SVOD SOONER+</th><th>Total SVOD</th><th>TVOD Location</th><th>TVOD Achat</th><th>Total TVOD</th>
 </tr></thead><tbody></tbody></table></div>
 </div>
 
 <!-- ===================== PAGE 3: GOOGLE ADS ===================== -->
 <div class="page" id="page-gads">
 <div class="kpi-grid" id="gads-kpis"></div>
-<div class="table-card"><h3>Campagnes Google Ads</h3><table id="gads-camp-table"><thead><tr>
+<div class="table-card"><h3>Campagnes programmatiques</h3><table id="gads-camp-table"><thead><tr>
 <th data-col="campaign">Campagne</th><th data-col="type">Type</th><th data-col="status">Statut</th><th data-col="cost">Co&ucirc;t</th><th data-col="impressions">Impressions</th><th data-col="clicks">Clics</th><th data-col="ctr">CTR</th><th data-col="cpc">CPC</th><th data-col="conversions">Conv</th><th data-col="allconv">All Conv</th><th data-col="cpa">CPA</th><th data-col="convrate">Taux Conv</th>
 </tr></thead><tbody></tbody></table></div>
-<div class="chart-card full" style="margin-bottom:28px"><h3>CPA par Campagne Google Ads</h3><canvas id="gads-cpa-chart"></canvas></div>
+<div class="chart-card full" style="margin-bottom:28px"><h3>CPA par campagne</h3><canvas id="gads-cpa-chart"></canvas></div>
 <div class="table-card"><h3>Actions de Conversion</h3><table id="gads-conv-table"><thead><tr>
 <th>Nom d'action</th><th>Cat&eacute;gorie</th><th>Conversions</th><th>Valeur</th>
 </tr></thead><tbody></tbody></table></div>
 <div class="info-block">
-<h3>Informations Google Ads</h3>
+<h3>Informations programmatique</h3>
 <p>Le processus de whitelisting copyright est en cours. Le retargeting est en attente de validation.</p>
 <div contenteditable="true" data-placeholder="Ajoutez vos notes ici..."></div>
 </div>
@@ -356,7 +356,7 @@ Export
 </tr></thead><tbody></tbody></table></div>
 <div class="chart-card full" style="margin-bottom:28px"><h3>&Eacute;volution 6 derniers mois</h3><canvas id="bilan-months-chart"></canvas></div>
 <div class="donuts-row">
-<div class="donut-card"><h3>META vs Google Ads</h3><div class="donut-wrap"><canvas id="bilan-donut-channel"></canvas></div></div>
+<div class="donut-card"><h3>META vs Programmatique</h3><div class="donut-wrap"><canvas id="bilan-donut-channel"></canvas></div></div>
 <div class="donut-card"><h3>SVOD vs TVOD</h3><div class="donut-wrap"><canvas id="bilan-donut-type"></canvas></div></div>
 </div>
 <div class="info-block comment-system">
@@ -398,7 +398,7 @@ Sauvegarder
 <div class="export-section">
 <div class="export-section-title">Sections</div>
 <label class="export-check"><input type="checkbox" name="expKpi" value="meta_table" checked> Tableau campagnes Meta</label>
-<label class="export-check"><input type="checkbox" name="expKpi" value="gads_table" checked> Tableau campagnes Google Ads</label>
+<label class="export-check"><input type="checkbox" name="expKpi" value="gads_table" checked> Tableau campagnes programmatiques</label>
 <label class="export-check"><input type="checkbox" name="expKpi" value="adsets" checked> Top Ad Sets</label>
 <label class="export-check"><input type="checkbox" name="expKpi" value="conversions"> Détail conversions</label>
 <label class="export-check"><input type="checkbox" name="expKpi" value="ga4_acq"> Acquisition GA4</label>
@@ -618,7 +618,7 @@ function showSkeletons(){
 var navItems=document.querySelectorAll('.nav-item');
 var pages=document.querySelectorAll('.page');
 var breadcrumb=document.getElementById('breadcrumb');
-var pageNames={overview:'Vue d\u2019ensemble',meta:'Meta Ads',gads:'Google Ads',ga4:'GA4 / Site',bilan:'Bilan Mensuel'};
+var pageNames={overview:'Vue d\u2019ensemble',meta:'Meta Ads',gads:'Programmatique',ga4:'GA4 / Site',bilan:'Bilan Mensuel'};
 
 navItems.forEach(function(item){
   item.addEventListener('click',function(){
@@ -979,7 +979,7 @@ function renderOverview(){
   if(ctxD1){
     charts.ovDonutSpend=new Chart(ctxD1,{
       type:'doughnut',
-      data:{labels:['META','Google Ads'],datasets:[{data:[metaSpend,gadsSpend],backgroundColor:['#6C5CE7','#3498DB'],hoverOffset:12,borderWidth:0}]},
+      data:{labels:['META','Programmatique'],datasets:[{data:[metaSpend,gadsSpend],backgroundColor:['#6C5CE7','#3498DB'],hoverOffset:12,borderWidth:0}]},
       options:{responsive:true,cutout:'65%',plugins:{legend:{position:'bottom'},tooltip:{callbacks:{label:function(ctx){return ctx.label+': '+fmtE(ctx.raw)}}}}}
     });
   }
@@ -988,7 +988,7 @@ function renderOverview(){
   if(ctxD2){
     charts.ovDonutConv=new Chart(ctxD2,{
       type:'doughnut',
-      data:{labels:['META SVOD','Google Ads SVOD'],datasets:[{data:[metaSvodPurch,gadsSvodPurch],backgroundColor:['#6C5CE7','#3498DB'],hoverOffset:12,borderWidth:0}]},
+      data:{labels:['META SVOD','Programmatique SVOD'],datasets:[{data:[metaSvodPurch,gadsSvodPurch],backgroundColor:['#6C5CE7','#3498DB'],hoverOffset:12,borderWidth:0}]},
       options:{responsive:true,cutout:'65%',plugins:{legend:{position:'bottom'}}}
     });
   }
@@ -1012,9 +1012,9 @@ function renderOverview(){
     function stPct(v){return totalAllConv>0?fmtPct((v/totalAllConv)*100):'0 %'}
     stTbody.innerHTML=
       '<tr style="background:rgba(174,0,255,0.06);font-weight:600"><td colspan="5">SVOD</td></tr>'+
-      '<tr><td style="padding-left:20px">Abo Mensuel Classique</td><td>'+fmt(lineAboMensuel)+'</td><td>'+fmtE(lineAboMensuelRev)+'</td><td>'+(lineAboMensuel>0?cpaHtml(totalSpend/totalSVOD):'\u2014')+'</td><td>'+stPct(lineAboMensuel)+'</td></tr>'+
-      '<tr><td style="padding-left:20px">Abo Annuel</td><td>'+fmt(lineAboAnnuel)+'</td><td>'+fmtE(lineAboAnnuelRev)+'</td><td>'+(lineAboAnnuel>0?cpaHtml(totalSpend/totalSVOD):'\u2014')+'</td><td>'+stPct(lineAboAnnuel)+'</td></tr>'+
-      '<tr><td style="padding-left:20px">Abo SOONER+</td><td>'+fmt(lineAboPlus)+'</td><td>'+fmtE(lineAboPlusRev)+'</td><td>'+(lineAboPlus>0?cpaHtml(totalSpend/totalSVOD):'\u2014')+'</td><td>'+stPct(lineAboPlus)+'</td></tr>'+
+      '<tr><td style="padding-left:20px">Abo Mensuel Classique</td><td>'+fmt(lineAboMensuel)+'</td><td>'+fmtE(lineAboMensuelRev)+'</td><td>\u2014</td><td>'+stPct(lineAboMensuel)+'</td></tr>'+
+      '<tr><td style="padding-left:20px">Abo Annuel</td><td>'+fmt(lineAboAnnuel)+'</td><td>'+fmtE(lineAboAnnuelRev)+'</td><td>\u2014</td><td>'+stPct(lineAboAnnuel)+'</td></tr>'+
+      '<tr><td style="padding-left:20px">Abo SOONER+</td><td>'+fmt(lineAboPlus)+'</td><td>'+fmtE(lineAboPlusRev)+'</td><td>\u2014</td><td>'+stPct(lineAboPlus)+'</td></tr>'+
       '<tr style="font-weight:600;border-top:1px solid var(--card-border)"><td>Sous-total SVOD</td><td>'+fmt(totalSVOD)+'</td><td>'+fmtE(totalRevSVOD)+'</td><td>'+cpaHtml(cpaSVOD)+'</td><td>'+stPct(totalSVOD)+'</td></tr>'+
       '<tr style="background:rgba(52,152,219,0.06);font-weight:600"><td colspan="5">TVOD</td></tr>'+
       '<tr><td style="padding-left:20px">TVOD Location</td><td>'+fmt(lineTvodLoc)+'</td><td>'+fmtE(lineTvodLocRev)+'</td><td>\u2014</td><td>'+stPct(lineTvodLoc)+'</td></tr>'+
@@ -1092,13 +1092,25 @@ function renderMeta(){
     campMap[n].purch+=pN(r['Website purchases']);
     var freq=pN(r['Frequency']);if(freq>0){campMap[n].freqSum+=freq;campMap[n].freqCount++}
   });
+  // Aggregate SVOD/TVOD per campaign from Meta_Conversions
+  var campConvMap={};
+  metaConv.forEach(function(r){
+    var n=r['Campaign name']||'Unknown';
+    if(!campConvMap[n])campConvMap[n]={svod:0,tvod:0};
+    campConvMap[n].svod+=pN(r['Purchase SVOD Mensuel Classique'])+pN(r['Purchase SVOD Annuel'])+pN(r['Purchase SVOD SOONER+']);
+    campConvMap[n].tvod+=pN(r['Purchase TVOD Achat'])+pN(r['Purchase TVOD Location']);
+  });
+
   var campArr=Object.keys(campMap).map(function(name){
     var d=campMap[name];
+    var convData=campConvMap[name]||{svod:0,tvod:0};
     return{name:name,spend:d.spend,imps:d.imps,reach:d.reach,clicks:d.clicks,
       ctr:d.imps>0?(d.clicks/d.imps)*100:0,
       cpc:d.clicks>0?d.spend/d.clicks:0,
       purch:d.purch,
-      cpa:d.purch>0?d.spend/d.purch:0,
+      svod:convData.svod,
+      tvod:convData.tvod,
+      cpa:convData.svod>0?d.spend/convData.svod:0,
       freq:d.freqCount>0?d.freqSum/d.freqCount:0};
   }).sort(function(a,b){return b.spend-a.spend});
 
@@ -1107,7 +1119,7 @@ function renderMeta(){
     return '<tr>'+
       '<td style="max-width:200px;overflow:hidden;text-overflow:ellipsis" title="'+c.name+'">'+c.name+'</td>'+
       '<td>'+fmtE(c.spend)+'</td><td>'+fmt(c.imps)+'</td><td>'+fmt(c.reach)+'</td><td>'+fmt(c.clicks)+'</td>'+
-      '<td>'+fmtPct(c.ctr)+'</td><td>'+fmtE(c.cpc)+'</td><td>'+fmt(c.purch)+'</td><td>'+cpaHtml(c.cpa)+'</td><td>'+c.freq.toFixed(2)+'</td>'+
+      '<td>'+fmtPct(c.ctr)+'</td><td>'+fmtE(c.cpc)+'</td><td>'+fmt(c.svod)+'</td><td>'+fmt(c.tvod)+'</td><td>'+cpaHtml(c.cpa)+'</td><td>'+c.freq.toFixed(2)+'</td>'+
     '</tr>';
   }).join('');
   makeSortable('meta-camp-table');
@@ -1175,6 +1187,7 @@ function renderMeta(){
   makeSortable('meta-adsets-table');
 
   // Top 10 Creatives by purchases desc
+  // TODO: Add thumbnail when 'Ad creative thumbnail URL' is available in Meta_ADS sheet
   var adMap={};
   metaAds.forEach(function(r){
     var k=(r['Ad name']||'')+'|||'+(r['Ad set name']||'')+'|||'+(r['Campaign name']||'');
@@ -1200,29 +1213,26 @@ function renderMeta(){
   }).join('');
   makeSortable('meta-ads-table');
 
-  // Conversions table
+  // Conversions table (SVOD/TVOD breakdown)
   var convMap={};
   metaConv.forEach(function(r){
     var n=r['Campaign name']||'Unknown';
-    if(!convMap[n])convMap[n]={customConv:0,purch:0,purchVal:0,leads:0,atc:0,checkouts:0,roasSum:0,roasCount:0};
-    convMap[n].customConv+=pN(r['Website custom conversions']);
-    convMap[n].purch+=pN(r['Website purchases']);
-    convMap[n].purchVal+=pN(r['Website purchases conversion value']);
-    convMap[n].leads+=pN(r['Website leads'])+pN(r['Offline leads']);
-    convMap[n].atc+=pN(r['Website adds to cart'])+pN(r['Omni adds to cart']);
-    convMap[n].checkouts+=pN(r['Website checkouts initiated'])+pN(r['Omni initiated checkouts']);
-    var roasVal=pN(r['Website purchase ROAS (return on advertising spend)']);
-    if(roasVal>0){convMap[n].roasSum+=roasVal;convMap[n].roasCount++}
+    if(!convMap[n])convMap[n]={svodMensuel:0,svodAnnuel:0,svodPlus:0,tvodLoc:0,tvodAchat:0};
+    convMap[n].svodMensuel+=pN(r['Purchase SVOD Mensuel Classique']);
+    convMap[n].svodAnnuel+=pN(r['Purchase SVOD Annuel']);
+    convMap[n].svodPlus+=pN(r['Purchase SVOD SOONER+']);
+    convMap[n].tvodLoc+=pN(r['Purchase TVOD Location']);
+    convMap[n].tvodAchat+=pN(r['Purchase TVOD Achat']);
   });
   var convTbody=document.querySelector('#meta-conv-table tbody');
   convTbody.innerHTML=Object.keys(convMap).map(function(n){
     var d=convMap[n];
-    var avgRoas=d.roasCount>0?d.roasSum/d.roasCount:0;
+    var totalSvod=d.svodMensuel+d.svodAnnuel+d.svodPlus;
+    var totalTvod=d.tvodLoc+d.tvodAchat;
     return '<tr>'+
       '<td style="max-width:200px;overflow:hidden;text-overflow:ellipsis" title="'+n+'">'+n+'</td>'+
-      '<td>'+fmt(d.customConv)+'</td><td>'+fmt(d.purch)+'</td><td>'+fmtE(d.purchVal)+'</td>'+
-      '<td>'+fmt(d.leads)+'</td><td>'+fmt(d.atc)+'</td><td>'+fmt(d.checkouts)+'</td>'+
-      '<td>'+avgRoas.toFixed(2)+'x</td>'+
+      '<td>'+fmt(d.svodMensuel)+'</td><td>'+fmt(d.svodAnnuel)+'</td><td>'+fmt(d.svodPlus)+'</td><td style="font-weight:600">'+fmt(totalSvod)+'</td>'+
+      '<td>'+fmt(d.tvodLoc)+'</td><td>'+fmt(d.tvodAchat)+'</td><td style="font-weight:600">'+fmt(totalTvod)+'</td>'+
     '</tr>';
   }).join('');
   makeSortable('meta-conv-table');
@@ -1536,8 +1546,7 @@ function renderGa4(){
   var funnelEl=document.getElementById('ga4-funnel');
   var steps=[
     {label:'Page Views',count:funnelData.views,color:'rgba(174,0,255,0.85)'},
-    {label:'View Item',count:funnelData.events,color:'rgba(174,0,255,0.65)'},
-    {label:'Checkouts',count:funnelData.checkouts,color:'rgba(174,0,255,0.45)'},
+    {label:'View Item',count:funnelData.events,color:'rgba(174,0,255,0.55)'},
     {label:'Achats',count:funnelData.purchases,color:'rgba(174,0,255,0.28)'}
   ];
   var funnelHTML='';
@@ -1697,7 +1706,7 @@ function renderBilan(){
   if(ctxBC){
     charts.bilanDonutChannel=new Chart(ctxBC,{
       type:'doughnut',
-      data:{labels:['META ('+fmtE(cur.metaSpend)+')','Google Ads ('+fmtE(cur.gadsSpend)+')'],datasets:[{data:[cur.metaSpend,cur.gadsSpend],backgroundColor:['#6C5CE7','#3498DB'],hoverOffset:12,borderWidth:0}]},
+      data:{labels:['META ('+fmtE(cur.metaSpend)+')','Programmatique ('+fmtE(cur.gadsSpend)+')'],datasets:[{data:[cur.metaSpend,cur.gadsSpend],backgroundColor:['#6C5CE7','#3498DB'],hoverOffset:12,borderWidth:0}]},
       options:{responsive:true,cutout:'65%',plugins:{legend:{position:'bottom'}}}
     });
   }
@@ -1768,7 +1777,7 @@ function exportCSV(){
   }
 
   if(selected.indexOf('gads_table')!==-1){
-    lines.push('CAMPAGNES GOOGLE ADS');
+    lines.push('CAMPAGNES PROGRAMMATIQUES');
     lines.push('Campagne,Cout,Impressions,Clics,CTR,CPC,Conversions,All Conv,CPA');
     var gcamps={};
     gadsC.forEach(function(r){var n=r['Campaign name'];if(!gcamps[n])gcamps[n]={c:0,i:0,cl:0,cv:0,ac:0};gcamps[n].c+=pN(r['Cost (EUR)']);gcamps[n].i+=pN(r['Impressions']);gcamps[n].cl+=pN(r['Clicks']);gcamps[n].cv+=pN(r['Conversions']);gcamps[n].ac+=pN(r['All conversions'])});
@@ -1928,7 +1937,7 @@ async function exportPDF(){
     if(selected.indexOf('gads_table')!==-1){
       need(50);
       doc.setFontSize(14);doc.setFont('helvetica','bold');tc(60,60,60);
-      doc.text('Campagnes Google Ads',M,y);y+=8;
+      doc.text('Campagnes programmatiques',M,y);y+=8;
 
       var gcamps={};
       gadsC.forEach(function(r){var n=r['Campaign name'];if(!gcamps[n])gcamps[n]={c:0,i:0,cl:0,cv:0,ac:0};gcamps[n].c+=pN(r['Cost (EUR)']);gcamps[n].i+=pN(r['Impressions']);gcamps[n].cl+=pN(r['Clicks']);gcamps[n].cv+=pN(r['Conversions']);gcamps[n].ac+=pN(r['All conversions'])});
