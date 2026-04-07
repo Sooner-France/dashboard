@@ -427,7 +427,20 @@ const CPA_TARGET = 15;
 // ---- META API CONFIG (for creative thumbnails) ----
 const META_AD_ACCOUNT = 'act_1236233621681504';
 const META_TOKEN = 'EAHnlLwNmFncBRK3ZCtocLOFFEgR6FjhRDbYUMYS9izW0a7TRZBMuLuYyrHPzvfKnbpW1nuWh1BfAnaFpCf3KxCBHITDZA4YZBKnhOnZAiVs8O0AW8ZAeaZBQkmKZCO9yPZC0LwDrGopz66elow41sVAReAZB9yUs3WgxohrOWgahjHIpSPn1RhQvPFPfebR3KE'; // Long-lived token (~60 jours, expire ~6 juin 2026)
-let adThumbnails = {}; // {adName: thumbnailUrl}
+let adThumbnails = {
+'SOONER_AGLVTN_61s':'https://scontent-mrs2-2.xx.fbcdn.net/v/t15.5256-10/654569002_1419430342762703_5768708025548059865_n.jpg?stp=c0.5000x0.5000f_dst-emg0_p64x64_q75_tt6',
+'SOONER_AGLVTN_61s - Copy':'https://scontent-mrs2-2.xx.fbcdn.net/v/t15.5256-10/654569002_1419430342762703_5768708025548059865_n.jpg?stp=c0.5000x0.5000f_dst-emg0_p64x64_q75_tt6',
+'SOONER_Spot_20s':'https://scontent-cdg4-1.xx.fbcdn.net/v/t15.5256-10/657778684_25889480850733605_4308809177149464742_n.jpg?stp=c0.5000x0.5000f_dst-emg0_p64x64_q75_tt6',
+'SOONER_Spot_20s - Copy':'https://scontent-cdg4-1.xx.fbcdn.net/v/t15.5256-10/657778684_25889480850733605_4308809177149464742_n.jpg?stp=c0.5000x0.5000f_dst-emg0_p64x64_q75_tt6',
+'SOONER_THESASHHHH_58s':'https://scontent-mrs2-3.xx.fbcdn.net/v/t15.5256-10/658321612_1642316150341937_7574778482573168208_n.jpg?stp=c0.5000x0.5000f_dst-emg0_p64x64_q75_tt6',
+'SOONER_THESASHHHH_58s - Copy':'https://scontent-mrs2-3.xx.fbcdn.net/v/t15.5256-10/658321612_1642316150341937_7574778482573168208_n.jpg?stp=c0.5000x0.5000f_dst-emg0_p64x64_q75_tt6',
+'SOONER_LOUN_60s':'https://scontent-mrs2-1.xx.fbcdn.net/v/t15.5256-10/656202204_1262793605252202_8866088539652168651_n.jpg?stp=c0.5000x0.5000f_dst-emg0_p64x64_q75_tt6',
+'SOONER_LOUN_60s - Copy':'https://scontent-mrs2-1.xx.fbcdn.net/v/t15.5256-10/656202204_1262793605252202_8866088539652168651_n.jpg?stp=c0.5000x0.5000f_dst-emg0_p64x64_q75_tt6',
+'SOONER_MARGAUX_59s':'https://scontent-mrs2-1.xx.fbcdn.net/v/t15.5256-10/655760141_1264911618417854_8134283481274649816_n.jpg?stp=c0.5000x0.5000f_dst-emg0_p64x64_q75_tt6',
+'SOONER_MARGAUX_59s - Copy':'https://scontent-mrs2-1.xx.fbcdn.net/v/t15.5256-10/655760141_1264911618417854_8134283481274649816_n.jpg?stp=c0.5000x0.5000f_dst-emg0_p64x64_q75_tt6',
+'SOONER_RAMY_54s':'https://scontent-mrs2-3.xx.fbcdn.net/v/t15.5256-10/656642006_981702594531637_2535291001543814651_n.jpg?stp=c0.5000x0.5000f_dst-emg0_p64x64_q75_tt6',
+'SOONER_RAMY_54s - Copy':'https://scontent-mrs2-3.xx.fbcdn.net/v/t15.5256-10/656642006_981702594531637_2535291001543814651_n.jpg?stp=c0.5000x0.5000f_dst-emg0_p64x64_q75_tt6'
+}; // Fallback thumbnails + enriched by Meta API
 
 // ---- DATA CONFIG ----
 const BASE = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSZagUxarZFDcCcmYW8fd1eXI_21odFFSu2ptSPWbnGYkog-UuH77A4iXv4Vv3A2DG2HGUnEWMTmrsc/pub?output=csv&single=true&gid=';
