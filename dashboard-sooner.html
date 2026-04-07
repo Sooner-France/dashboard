@@ -562,7 +562,10 @@ async function fetchAll(){
   // Render overview immediately with partial data
   try{renderOverview()}catch(e){}
   await Promise.all(batch2.map(fetchOne));
-  console.log('[SOONER] All data loaded.');
+  // Filter Google Ads data to SOONER campaigns only
+  if(DATA.Gads_Campagnes)DATA.Gads_Campagnes=DATA.Gads_Campagnes.filter(function(r){return(r['Campaign name']||'').toUpperCase().indexOf('SOONER')!==-1});
+  if(DATA.Gads_Conversions)DATA.Gads_Conversions=DATA.Gads_Conversions.filter(function(r){return(r['Conversion type name']||'').toLowerCase().indexOf('sooner')!==-1});
+  console.log('[SOONER] All data loaded. Gads filtered: Campagnes='+((DATA.Gads_Campagnes||[]).length)+', Conversions='+((DATA.Gads_Conversions||[]).length));
 
   // Update status banner
   var sourceCount=0;var totalRows=0;var lastDate=null;
