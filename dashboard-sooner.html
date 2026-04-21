@@ -299,6 +299,15 @@ Export
 <!-- ===================== PAGE 2: META ADS ===================== -->
 <div class="page" id="page-meta">
 <div class="kpi-grid" id="meta-kpis"></div>
+<!-- Détail conversions Meta par type -->
+<div class="table-card" style="margin-bottom:20px">
+<h3>Détail Conversions par Type</h3>
+<p style="font-size:12px;color:var(--text-secondary,rgba(240,238,245,0.55));margin:0 0 16px">Répartition des conversions Meta Ads par type d'abonnement et TVOD.</p>
+<div class="kpi-grid" id="meta-conv-detail-kpis" style="margin-bottom:16px"></div>
+<table id="meta-conv-detail-table"><thead><tr>
+<th>Type de conversion</th><th>Conversions</th><th>Valeur</th><th>CPA effectif</th><th>% du total</th>
+</tr></thead><tbody></tbody></table>
+</div>
 <div class="table-card"><h3>Campagnes Meta</h3><table id="meta-camp-table"><thead><tr>
 <th data-col="campaign">Campagne</th><th data-col="spend">D&eacute;penses</th><th data-col="impressions">Impressions</th><th data-col="reach">Reach</th><th data-col="clicks">Clics</th><th data-col="ctr">CTR</th><th data-col="cpc">CPC</th><th data-col="svod">SVOD</th><th data-col="tvod">TVOD</th><th data-col="cpa">CPA</th><th data-col="freq">Fr&eacute;quence</th>
 </tr></thead><tbody></tbody></table></div>
@@ -1337,6 +1346,44 @@ function renderMeta(){
     '</tr>';
   }).join('');
   makeSortable('meta-conv-table');
+
+  // ── Détail conversions Meta par type ──
+  var metaDetailKpis=document.getElementById('meta-conv-detail-kpis');
+  var metaDetailTbody=document.querySelector('#meta-conv-detail-table tbody');
+  if(metaDetailKpis&&metaDetailTbody){
+    var metaTypes=[
+      {key:'Purchase SVOD Mensuel Classique',valKey:'Purchase SVOD Mensuel Classique conversion value',label:'SVOD Mensuel Classique',icon:'<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>'},
+      {key:'Purchase SVOD Annuel',valKey:'Purchase SVOD Annuel conversion value',label:'SVOD Annuel',icon:'<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>'},
+      {key:'Purchase SVOD SOONER+',valKey:'Purchase SVOD SOONER+ conversion value',label:'SVOD SOONER+',icon:'<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/></svg>'},
+      {key:'Purchase TVOD Location',valKey:'Purchase TVOD Location conversion value',label:'TVOD Location',icon:'<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="5,3 19,12 5,21"/></svg>'},
+      {key:'Purchase TVOD Achat',valKey:'Purchase TVOD Achat conversion value',label:'TVOD Achat',icon:'<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>'}
+    ];
+    var totalAllMeta=0;
+    var metaTypeData=metaTypes.map(function(mt){
+      var c=metaConv.reduce(function(s,r){return s+pN(r[mt.key])},0);
+      var v=metaConv.reduce(function(s,r){return s+pN(r[mt.valKey]||0)},0);
+      totalAllMeta+=c;
+      return{label:mt.label,icon:mt.icon,conv:c,val:v};
+    });
+    var totalSvodMeta=metaAboMensuel+metaAboAnnuel+metaAboPlus;
+    var totalTvodMeta=metaConv.reduce(function(s,r){return s+pN(r['Purchase TVOD Achat'])+pN(r['Purchase TVOD Location'])},0);
+    metaDetailTbody.innerHTML=metaTypeData.map(function(d){
+      var cpaEff=d.conv>0?spend/d.conv:0;
+      var pct=totalAllMeta>0?((d.conv/totalAllMeta)*100).toFixed(1)+'%':'—';
+      var isSvod=d.label.indexOf('SVOD')!==-1;
+      return '<tr>'
+        +'<td style="display:flex;align-items:center;gap:8px">'+d.icon+' '+d.label+'</td>'
+        +'<td>'+fmt(d.conv)+'</td>'
+        +'<td>'+fmtE(d.val)+'</td>'
+        +'<td>'+(d.conv>0?fmtE(cpaEff):'—')+'</td>'
+        +'<td>'+pct+'</td></tr>';
+    }).join('');
+    metaDetailKpis.innerHTML=[
+      kpiCardHTML('mcd-1','<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M8 12l2.5 2.5L16 9"/></svg>',fmt(totalSvodMeta),'Total SVOD','',''),
+      kpiCardHTML('mcd-2','<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="5,3 19,12 5,21"/></svg>',fmt(totalTvodMeta),'Total TVOD','',''),
+      kpiCardHTML('mcd-3','<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 20V10M18 20V4M6 20v-4"/></svg>',fmt(totalAllMeta),'Total toutes conversions','',''),
+    ].join('');
+  }
 }
 
 // ============================================================
