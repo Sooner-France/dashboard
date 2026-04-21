@@ -317,6 +317,15 @@ Export
 <!-- ===================== PAGE 3: GOOGLE ADS ===================== -->
 <div class="page" id="page-gads">
 <div class="kpi-grid" id="gads-kpis"></div>
+<!-- Détail conversions par type d'abonnement -->
+<div class="table-card" style="margin-bottom:20px">
+<h3>Détail Conversions par Type</h3>
+<p style="font-size:12px;color:var(--text-secondary,rgba(240,238,245,0.55));margin:0 0 16px">Détail des conversions secondaires configurées dans Google Ads — incluant les différents types d'abonnement et TVOD.</p>
+<div class="kpi-grid" id="gads-conv-detail-kpis" style="margin-bottom:16px"></div>
+<table id="gads-conv-detail-table"><thead><tr>
+<th>Type de conversion</th><th>Optimisation</th><th>Conversions</th><th>Valeur</th><th>CPA effectif</th>
+</tr></thead><tbody></tbody></table>
+</div>
 <div class="table-card"><h3>Campagnes programmatiques</h3><table id="gads-camp-table"><thead><tr>
 <th data-col="campaign">Campagne</th><th data-col="type">Type</th><th data-col="status">Statut</th><th data-col="cost">Co&ucirc;t</th><th data-col="impressions">Impressions</th><th data-col="clicks">Clics</th><th data-col="ctr">CTR</th><th data-col="cpc">CPC</th><th data-col="conversions">Conv</th><th data-col="allconv">All Conv</th><th data-col="cpa">CPA</th><th data-col="convrate">Taux Conv</th>
 </tr></thead><tbody></tbody></table></div>
@@ -1473,6 +1482,44 @@ function renderGads(){
     return '<tr><td>'+n+'</td><td>'+d.cat+'</td><td>'+fmt(d.conv)+'</td><td>'+fmtE(d.val)+'</td></tr>';
   }).join('');
   makeSortable('gads-conv-table');
+
+  // ── Détail conversions par type (secondaires) ──
+  var convTypes=[
+    {name:'Sooner - Abonnement',label:'Abonnement (Principale)',optim:'Principale',icon:'<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M8 12l2.5 2.5L16 9"/></svg>'},
+    {name:'Sooner - Abonnement Annuel',label:'Abonnement Annuel',optim:'Secondaire',icon:'<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>'},
+    {name:'Sooner - Abonnement Mensuel Classique',label:'Mensuel Classique',optim:'Secondaire',icon:'<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>'},
+    {name:'Sooner - Abonnement SOONER+',label:'SOONER+',optim:'Secondaire',icon:'<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/></svg>'},
+    {name:'Sooner - Location TVOD',label:'Location TVOD',optim:'Secondaire',icon:'<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="5,3 19,12 5,21"/></svg>'},
+    {name:'Sooner - Achat TVOD',label:'Achat TVOD',optim:'Secondaire',icon:'<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>'}
+  ];
+  var detailKpis=document.getElementById('gads-conv-detail-kpis');
+  var detailTbody=document.querySelector('#gads-conv-detail-table tbody');
+  if(detailKpis&&detailTbody){
+    var detailRows=[];
+    var svodTotal=0,tvodTotal=0;
+    convTypes.forEach(function(ct){
+      var d=convActMap[ct.name]||{conv:0,val:0};
+      var cpaEff=d.conv>0?cost/d.conv:0;
+      var isPrincipal=ct.optim==='Principale';
+      detailRows.push('<tr style="'+(isPrincipal?'background:rgba(174,0,255,0.04);font-weight:500':'')+'">'
+        +'<td style="display:flex;align-items:center;gap:8px">'+ct.icon+' '+ct.label+'</td>'
+        +'<td><span style="display:inline-block;padding:2px 8px;border-radius:99px;font-size:10px;letter-spacing:0.04em;'
+        +(isPrincipal?'background:rgba(174,0,255,0.12);color:#c44dff':'background:rgba(232,134,42,0.12);color:#E8862A')
+        +'">'+ct.optim+'</span></td>'
+        +'<td>'+fmt(d.conv)+'</td>'
+        +'<td>'+fmtE(d.val)+'</td>'
+        +'<td>'+(d.conv>0?fmtE(cpaEff):'—')+'</td></tr>');
+      if(ct.name.indexOf('Abonnement')!==-1)svodTotal+=d.conv;
+      if(ct.name.indexOf('TVOD')!==-1)tvodTotal+=d.conv;
+    });
+    detailTbody.innerHTML=detailRows.join('');
+    // Mini KPIs for SVOD vs TVOD breakdown
+    detailKpis.innerHTML=[
+      kpiCardHTML('gcd-1','<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M8 12l2.5 2.5L16 9"/></svg>',fmt(svodTotal),'Total SVOD (Abonnements)','',''),
+      kpiCardHTML('gcd-2','<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="5,3 19,12 5,21"/></svg>',fmt(tvodTotal),'Total TVOD (Locations + Achats)','',''),
+      kpiCardHTML('gcd-3','<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 20V10M18 20V4M6 20v-4"/></svg>',fmt(Object.keys(convActMap).length),'Actions de conversion actives','',''),
+    ].join('');
+  }
 }
 
 // ============================================================
